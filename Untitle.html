@@ -1,0 +1,184 @@
+
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+
+    <!--
+  ArcGIS API for JavaScript, https://js.arcgis.com
+  For more information about the visualization-dot-density sample, read the original sample description at developers.arcgis.com.
+  https://developers.arcgis.com/javascript/latest/sample-code/visualization-dot-density/index.html
+  -->
+<title>US Immigration </title>
+
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.13/esri/themes/dark/main.css"
+    />
+
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+
+    <script src="https://js.arcgis.com/4.13/"></script>
+
+    <script>
+      require([
+        "esri/WebMap",
+        "esri/views/MapView",
+        "esri/layers/FeatureLayer",
+        "esri/renderers/DotDensityRenderer",
+        "esri/widgets/Legend",
+        "esri/widgets/Bookmarks",
+        "esri/widgets/Expand"
+      ], function(
+        WebMap,
+        MapView,
+        FeatureLayer,
+        DotDensityRenderer,
+        Legend,
+        Bookmarks,
+        Expand
+      ) {
+        const map = new WebMap({
+          basemap: "dark-gray-vector"
+         // portalItem: {
+        // id: "56b5bd522c52409c90d902285732e9f1"
+         // }
+        });
+
+        const view = new MapView({
+          container: "viewDiv",
+          zoom: 3,
+          center: [-45, 30],
+          map: map,
+          highlightOptions: {
+            fillOpacity: 0,
+            color: [50, 50, 50]
+          },
+          popup: {
+            dockEnabled: true,
+            dockOptions: {
+              position: "top-right",
+              breakpoint: false
+            }
+          },
+          constraints: {
+            maxScale: 35000
+          }
+        });
+
+        view.when().then(function() {
+          const dotDensityRenderer = new DotDensityRenderer({
+            dotValue: 5,
+            outline: null,
+            referenceScale: 577790, // 1:577,790 view scale
+            
+            legendOptions: {
+              unit: "people"
+            },
+            attributes: [
+              {
+                field: "Total_2017",
+                color: "#f23c3f",
+                label: "Total 2017"
+              },
+              {
+                field: "F2016_Total",
+                color: "#e8ca0d",
+                label: "Total 2016"
+              },
+               {
+                field: "F2015_Immigration_2015_Total",
+                color: "#00b6f1",
+                label: "Total 2015"
+              }
+            ]
+          });
+
+          // Add renderer to the layer and define a popup template
+          const url =
+            "https://services9.arcgis.com/tuaF829zGxPzrij9/ArcGIS/rest/services/US_Immigration_from_2015_to_2017_WFL1/FeatureServer";
+          const layer = new FeatureLayer({
+            url: url,
+            minScale: 10000000000,
+            maxScale: 1000,
+            title: "Birthplace of Lawful Permanent Resident's",
+            popupTemplate: {
+              title: "{NAME_EN}",
+              content: [
+                {
+                  type: "fields",
+                  fieldInfos: [
+                    {
+                      fieldName: "Total_2017",
+                      label: "2017 Total",
+                      format: {
+                        digitSeparator: true,
+                        places: 0
+                      }
+                    },
+                    {
+                      fieldName: "F2016_Total",
+                      label: "2016 Total",
+                      format: {
+                        digitSeparator: true,
+                        places: 0
+                      }
+                    },
+                    {
+                      fieldName: "F2015_Immigration_2015_Total",
+                      label: "2015 Total",
+                      format: {
+                        digitSeparator: true,
+                        places: 0
+                      }
+                      
+                    }
+                  ]
+                }
+              ]
+            },
+            renderer: dotDensityRenderer
+          });
+
+          map.add(layer);
+
+          view.ui.add(
+            [
+              new Expand({
+                view: view,
+                content: new Legend({ view: view }),
+                group: "top-left",
+                expanded: true
+              }),
+              new Expand({
+                view: view,
+                content: new Bookmarks({ view: view }),
+                group: "top-left"
+              })
+            ],
+            "top-left"
+          );
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv"></div>
+  </body>
+</html>
+
+
